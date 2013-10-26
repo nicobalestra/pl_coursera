@@ -1,4 +1,4 @@
-(* Coursera Programming Languages, Homework 3, Provided Code *)
+(* Nico Balestra - Coursera Programming Languages, Homework 3 *)
 
 exception NoAnswer
 
@@ -83,13 +83,22 @@ val  rev_string = String.implode o rev o String.explode
   Problem 7
 *)
 
-fun first_answer f list =
+fun first_answer_old f list =
     case (((List.foldl (fn (acc, curr_elem) => case curr_elem of
                                                  NONE => acc
                                                | SOME(x) => SOME (x)) NONE) o (List.map f)) list) of
         NONE => raise NoAnswer
       | SOME (x) => x
 
+
+fun first_answer f list =
+    case (((List.foldl (fn (acc, curr_elem) =>
+                           case (acc, curr_elem) of
+                               (_, NONE) => acc
+                             | (SOME(x), SOME(Y)) => SOME (x)
+                             | (_, SOME(x)) => SOME(x) ) NONE) o (List.map f)) list) of
+        NONE => raise NoAnswer
+      | SOME (x) => x
 
 (* Problem 8
 TO BE DOUBLE CHECKED
@@ -145,3 +154,11 @@ fun count_some_var (str, pattern) =
                                                              then match (v, p)
                                                              else NONE
        | _ => NONE
+
+(* Problem 12*)
+fun first_match v patterns =
+    SOME(first_answer
+             (fn (v, pat) => match (v, pat))
+             (List.map (fn pat => (v, pat)) patterns)
+        )
+    handle NoAnswer => NONE
