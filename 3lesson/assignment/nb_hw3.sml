@@ -38,7 +38,7 @@ datatype typ = Anything
 (* Problem 1
    Given a list of strings, return a list of all strings starting by capital letter*)
 fun only_capitals str_list =
-    List.filter (fn x => Char.isUpper(String.sub(x, 0))) str_list
+    List.filter (fn x => if x = "" then false else Char.isUpper(String.sub(x, 0))) str_list
 
 (* Problem 2
    Given a list of strings return the longest string in the list. In case two or more strings are the longest, return the one closest to the beginning of the list *)
@@ -70,7 +70,7 @@ val longest_string4 = longest_string_helper (fn (x, y) => x >= y)
   return the one closest to the beginning of the list
 *)
 
-val longest_capitalized =  longest_string3 o (List.filter (fn x => Char.isUpper(String.sub(x, 0))))
+val longest_capitalized =  longest_string3 o (List.filter (fn x => if x = "" then false else Char.isUpper(String.sub(x, 0))))
 
 (*
   Problem 6
@@ -83,16 +83,8 @@ val  rev_string = String.implode o rev o String.explode
   Problem 7
 *)
 
-fun first_answer_old f list =
-    case (((List.foldl (fn (acc, curr_elem) => case curr_elem of
-                                                 NONE => acc
-                                               | SOME(x) => SOME (x)) NONE) o (List.map f)) list) of
-        NONE => raise NoAnswer
-      | SOME (x) => x
-
-
 fun first_answer f list =
-    case (((List.foldl (fn (acc, curr_elem) =>
+    case (((List.foldl (fn (curr_elem, acc) =>
                            case (acc, curr_elem) of
                                (_, NONE) => acc
                              | (SOME(x), SOME(Y)) => SOME (x)
@@ -107,7 +99,7 @@ fun all_answers f list =
     let fun lst_to_SOME some_list =
             case some_list of
                 [] => []
-              | (SOME(x))::xs => lst_to_SOME(xs) @ x
+              | (SOME(x))::xs => x @ lst_to_SOME(xs)
         val temp = List.map f list
     in
         if List.exists (fn x => case x of SOME(x) => false | NONE => true) temp then NONE else SOME(lst_to_SOME temp)
@@ -115,7 +107,7 @@ fun all_answers f list =
 
 
 (* Problem 9a *)
-fun count_wildcard pattern =
+fun count_wildcards pattern =
         g (fn _ => 1) (fn _ => 0) pattern
 
 (* Problem 9b *)
@@ -159,6 +151,4 @@ fun count_some_var (str, pattern) =
 fun first_match v patterns =
     SOME(first_answer
              (fn (v, pat) => match (v, pat))
-             (List.map (fn pat => (v, pat)) patterns)
-        )
-    handle NoAnswer => NONE
+             (List.map (fn pat => (v, pat)) patterns)) handle NoAnswer => NONE
